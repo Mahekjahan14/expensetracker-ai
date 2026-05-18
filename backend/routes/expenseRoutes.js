@@ -32,9 +32,9 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     // Convert buffer to base64
     const base64Data = req.file.buffer.toString('base64');
     
-    // Call Gemini
+    // Call Gemini using universally supported multimodal 1.5-flash
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-1.5-flash',
       contents: [
         {
           role: 'user',
@@ -60,10 +60,10 @@ router.post('/upload', upload.single('image'), async (req, res) => {
 
     // Create expense from extracted data
     const expense = await Expense.create({
-      title: extractedData.title || 'Unknown Bill',
-      amount: extractedData.amount || 0,
-      category: extractedData.category || 'Other',
-      date: extractedData.date || new Date().toISOString().split('T')[0]
+      title: extractedData?.title || 'Unknown Bill',
+      amount: extractedData?.amount || 0,
+      category: extractedData?.category || 'Other',
+      date: extractedData?.date || new Date().toISOString().split('T')[0]
     });
 
     res.status(201).json(expense);

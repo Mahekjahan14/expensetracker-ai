@@ -1,4 +1,17 @@
 {
-  "name": "smartexpense-ai",
-  "private": true
+  "name": "smartexpense-ai-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "cd frontend && npm install --legacy-peer-deps && npm run build && node -e \"const fs=require('fs'); fs.cpSync('build', '../build', {recursive:true});\"",
+    "vercel-build": "cd frontend && npm install --legacy-peer-deps && npm run build && node -e \"const fs=require('fs'); fs.cpSync('build', '../build', {recursive:true});\""
+  },
+  "dependencies": {
+    "@google/genai": "^1.52.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.5.1",
+    "multer": "^1.4.5-lts.1"
+  }
 }

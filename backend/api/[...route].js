@@ -1,5 +1,5 @@
-const app = require("./index");
+const app = require('./index');
 
 module.exports = (req, res) => {
-  app(req, res);
+  return app(req, res);
 };

@@ -1,138 +1,170 @@
-
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 const API_URL = '/api/expenses';
 
-function ExpenseDashboard() {
+const ExpenseDashboard = () => {
 
- const [expenses, setExpenses] = useState([]);
- const [form, setForm] = useState({
-   title: '',
-   amount: '',
-   category: '',
-   date: ''
- });
- const [file, setFile] = useState(null);
- const [isUploading, setIsUploading] = useState(false);
+  const [expenses, setExpenses] = useState([]);
+  const [form, setForm] = useState({
+    title: '',
+    amount: '',
+    category: '',
+    date: ''
+  });
 
- useEffect(() => {
-   fetchExpenses();
- }, []);
+  const [file, setFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
- const fetchExpenses = async () => {
-   const res = await axios.get(API_URL);
-   setExpenses(res.data);
- };
+  useEffect(() => {
+    fetchExpenses();
+  }, []);
 
- const handleSubmit = async (e) => {
-   e.preventDefault();
+  const fetchExpenses = async () => {
+    try {
+      const res = await axios.get(API_URL);
 
-   await axios.post(API_URL, form);
+      const data =
+        res.data?.expenses ||
+        res.data?.data ||
+        res.data;
 
-   setForm({
-     title: '',
-     amount: '',
-     category: '',
-     date: ''
-   });
+      setExpenses(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error(err);
+      setExpenses([]);
+    }
+  };
 
-   fetchExpenses();
- };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
- const handleDelete = async (id) => {
-   await axios.delete(`${API_URL}/${id}`);
-   fetchExpenses();
- };
+    try {
+      await axios.post(API_URL, form);
 
- const handleFileChange = (e) => {
-   if (e.target.files && e.target.files[0]) {
-     setFile(e.target.files[0]);
-   }
- };
+      setForm({
+        title: '',
+        amount: '',
+        category: '',
+        date: ''
+      });
 
- const handleUpload = async () => {
-   if (!file) return;
-   setIsUploading(true);
-   const formData = new FormData();
-   formData.append('image', file);
-   try {
-     await axios.post(`${API_URL}/upload`, formData, {
-       headers: { 'Content-Type': 'multipart/form-data' }
-     });
-     setFile(null);
-     // clear the file input field
-     document.getElementById('bill-upload').value = '';
-     fetchExpenses();
-   } catch (err) {
-     console.error('Error uploading file:', err);
-     alert('Error processing bill image. Please check backend logs and API Key.');
-   } finally {
-     setIsUploading(false);
-   }
- };
+      fetchExpenses();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
- return (
-   <div>
-     <div className="form" style={{ marginBottom: '20px', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
-       <h3>Scan Bill via AI</h3>
-       <input id="bill-upload" type="file" accept="image/*" onChange={handleFileChange} style={{ marginBottom: '10px' }} />
-       <button onClick={handleUpload} disabled={isUploading || !file} style={{ width: '100%' }}>
-         {isUploading ? 'Analyzing Bill...' : 'Upload & Scan'}
-       </button>
-     </div>
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`${API_URL}/${id}`);
+      fetchExpenses();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-     <form className="form" onSubmit={handleSubmit}>
-       <input
-         type="text"
-         placeholder="Expense Title"
-         value={form.title}
-         onChange={(e) => setForm({...form, title: e.target.value})}
-         required
-       />
+  const handleFileChange = (e) => {
+    setFile(e.target.files?.[0] || null);
+  };
 
-       <input
-         type="number"
-         placeholder="Amount"
-         value={form.amount}
-         onChange={(e) => setForm({...form, amount: e.target.value})}
-         required
-       />
+  const handleUpload = async () => {
+    if (!file) return;
 
-       <input
-         type="text"
-         placeholder="Category"
-         value={form.category}
-         onChange={(e) => setForm({...form, category: e.target.value})}
-         required
-       />
+    setIsUploading(true);
 
-       <input
-         type="date"
-         value={form.date}
-         onChange={(e) => setForm({...form, date: e.target.value})}
-         required
-       />
+    const formData = new FormData();
+    formData.append('image', file);
 
-       <button type="submit">Add Expense</button>
-     </form>
+    try {
+      await axios.post(`${API_URL}/upload`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
 
-     <div className="cards">
-       {expenses.map((expense) => (
-         <div className="card" key={expense._id}>
-           <h3>{expense.title}</h3>
-           <p>₹ {expense.amount}</p>
-           <p>{expense.category}</p>
-           <p>{expense.date}</p>
+      setFile(null);
+      document.getElementById('bill-upload').value = '';
+      fetchExpenses();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
-           <button onClick={() => handleDelete(expense._id)}>
-             Delete
-           </button>
-         </div>
-       ))}
-     </div>
-   </div>
- );
-}
+  return (
+    <div>
+
+      <div className="form">
+        <h3>Scan Bill via AI</h3>
+
+        <input
+          id="bill-upload"
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+        />
+
+        <button onClick={handleUpload} disabled={isUploading || !file}>
+          {isUploading ? 'Analyzing...' : 'Upload & Scan'}
+        </button>
+      </div>
+
+      <form className="form" onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Expense Title"
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+          required
+        />
+
+        <input
+          type="number"
+          placeholder="Amount"
+          value={form.amount}
+          onChange={(e) => setForm({ ...form, amount: e.target.value })}
+          required
+        />
+
+        <input
+          type="text"
+          placeholder="Category"
+          value={form.category}
+          onChange={(e) => setForm({ ...form, category: e.target.value })}
+          required
+        />
+
+        <input
+          type="date"
+          value={form.date}
+          onChange={(e) => setForm({ ...form, date: e.target.value })}
+          required
+        />
+
+        <button type="submit">Add Expense</button>
+      </form>
+
+      <div className="cards">
+        {Array.isArray(expenses) && expenses.length > 0 ? (
+          expenses.map((expense) => (
+            <div className="card" key={expense._id}>
+              <h3>{expense.title}</h3>
+              <p>₹ {expense.amount}</p>
+              <p>{expense.category}</p>
+              <p>{expense.date}</p>
+
+              <button onClick={() => handleDelete(expense._id)}>
+                Delete
+              </button>
+            </div>
+          ))
+        ) : (
+          <p>No expenses found</p>
+        )}
+      </div>
+
+    </div>
+  );
+};
 
 export default ExpenseDashboard;

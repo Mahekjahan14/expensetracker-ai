@@ -10,7 +10,7 @@ app.use(cors());
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-app.post('/api/expenses/upload', upload.single('image'), async (req, res) => {
+const uploadHandler = async (req, res) => {
   try {
     await connectDB();
 
@@ -62,6 +62,10 @@ app.post('/api/expenses/upload', upload.single('image'), async (req, res) => {
     console.error('AI Error:', err);
     res.status(500).json({ error: err.message || 'AI processing failed' });
   }
-});
+};
+
+app.post('/api/expenses/upload', upload.single('image'), uploadHandler);
+app.post('/', upload.single('image'), uploadHandler);
+app.post('/upload', upload.single('image'), uploadHandler);
 
 module.exports = app;

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { TrendingUp, CreditCard, PieChart as PieChartIcon } from 'lucide-react';
 
-const API_URL = `${process.env.REACT_APP_API_URL || ''}/api/expenses`;
+const API_URL = '/api/expenses';
 const COLORS = ['#6366f1', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 function DashboardPage() {

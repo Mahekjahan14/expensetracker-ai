@@ -33,11 +33,11 @@ app.use(async (req, res, next) => {
 });
 
 // Robust multi-path mounting to ensure Vercel serverless rewrites match correctly
-const expenseRoutes = require('../routes/expenseRoutes');
+const expenseRoutes = require('./routes/expenseRoutes');
 app.use('/api/expenses', expenseRoutes);
 app.use('/expenses', expenseRoutes);
-app.use('/backend/api/expenses', expenseRoutes);
-app.use('/backend/api', expenseRoutes);
+app.use('/backend/server/expenses', expenseRoutes);
+app.use('/backend/server', expenseRoutes);
 
 // Health check
 app.get('/api', (req, res) => {

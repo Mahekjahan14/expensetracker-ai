@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/expenses';
+const API_URL = `${process.env.REACT_APP_API_URL || ''}/api/expenses`;
 
 function ExpenseDashboard() {
 

@@ -18,11 +18,14 @@ function DashboardPage() {
   const fetchExpenses = async () => {
     try {
       const res = await axios.get(API_URL);
-      const data = res.data;
-      setExpenses(data);
-      processChartData(data);
+      const data = res.data?.expenses || res.data?.data || res.data;
+      const validArray = Array.isArray(data) ? data : [];
+      setExpenses(validArray);
+      processChartData(validArray);
     } catch (err) {
       console.error('Failed to fetch expenses', err);
+      setExpenses([]);
+      processChartData([]);
     }
   };
 
@@ -30,12 +33,14 @@ function DashboardPage() {
     let total = 0;
     const categoryMap = {};
 
-    data.forEach(exp => {
-      const amt = Number(exp.amount) || 0;
-      total += amt;
-      const cat = exp.category || 'Other';
-      categoryMap[cat] = (categoryMap[cat] || 0) + amt;
-    });
+    if (Array.isArray(data)) {
+      data.forEach(exp => {
+        const amt = Number(exp?.amount) || 0;
+        total += amt;
+        const cat = exp?.category || 'Other';
+        categoryMap[cat] = (categoryMap[cat] || 0) + amt;
+      });
+    }
 
     setTotalSpent(total);
 
@@ -71,7 +76,7 @@ function DashboardPage() {
           </div>
           <div className="stat-content">
             <h3>Total Transactions</h3>
-            <p>{expenses.length}</p>
+            <p>{Array.isArray(expenses) ? expenses.length : 0}</p>
           </div>
         </div>
 

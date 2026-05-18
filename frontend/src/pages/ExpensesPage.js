@@ -27,31 +27,41 @@ function ExpensesPage() {
   const fetchExpenses = async () => {
     try {
       const res = await axios.get(API_URL);
-      setExpenses(res.data);
+      const data = res.data?.expenses || res.data?.data || res.data;
+      setExpenses(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error(err);
+      console.error('Failed to fetch expenses:', err);
+      setExpenses([]);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await axios.post(API_URL, form);
-    setForm({ title: '', amount: '', category: '', date: '' });
-    fetchExpenses();
+    try {
+      await axios.post(API_URL, form);
+      setForm({ title: '', amount: '', category: '', date: '' });
+      fetchExpenses();
+    } catch (err) {
+      console.error('Error adding expense:', err);
+    }
   };
 
   const handleDelete = async (id) => {
-    await axios.delete(`${API_URL}/${id}`);
-    fetchExpenses();
+    try {
+      await axios.delete(`${API_URL}/${id}`);
+      fetchExpenses();
+    } catch (err) {
+      console.error('Error deleting expense:', err);
+    }
   };
 
   const startEdit = (expense) => {
     setEditingId(expense._id);
     setEditForm({
-      title: expense.title,
-      amount: expense.amount,
-      category: expense.category,
-      date: expense.date
+      title: expense.title || '',
+      amount: expense.amount || '',
+      category: expense.category || '',
+      date: expense.date || ''
     });
   };
 
@@ -186,7 +196,7 @@ function ExpensesPage() {
 
       <h3 className="chart-title">Recent Expenses</h3>
       <div className="expense-list">
-        {expenses.length === 0 ? (
+        {!Array.isArray(expenses) || expenses.length === 0 ? (
           <p style={{ color: 'var(--text-light)' }}>No expenses recorded yet.</p>
         ) : (
           expenses.map((expense) => (
@@ -241,11 +251,11 @@ function ExpensesPage() {
                     </div>
                     <div className="expense-details">
                       <h4>{expense.title}</h4>
-                      <p>{expense.category} • {new Date(expense.date).toLocaleDateString()}</p>
+                      <p>{expense.category} • {expense.date ? new Date(expense.date).toLocaleDateString() : 'N/A'}</p>
                     </div>
                   </div>
                   <div className="expense-actions">
-                    <div className="expense-amount">₹ {Number(expense.amount).toLocaleString()}</div>
+                    <div className="expense-amount">₹ {Number(expense.amount || 0).toLocaleString()}</div>
                     
                     <button 
                       className="btn btn-secondary" 

@@ -10,12 +10,21 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Connect to MongoDB (Vercel keeps connections warm between calls)
+// Connect to MongoDB with connection caching for serverless functions
 let isConnected = false;
 async function connectDB() {
   if (isConnected) return;
-  await mongoose.connect(process.env.MONGO_URI);
-  isConnected = true;
+  if (!process.env.MONGO_URI) {
+    console.error("MONGO_URI is not configured in Vercel Environment Variables");
+    return;
+  }
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    isConnected = true;
+    console.log("MongoDB Connected successfully");
+  } catch (err) {
+    console.error("MongoDB connection error:", err);
+  }
 }
 
 app.use(async (req, res, next) => {
@@ -23,7 +32,12 @@ app.use(async (req, res, next) => {
   next();
 });
 
-app.use('/api/expenses', require('../routes/expenseRoutes'));
+// Robust multi-path mounting to ensure Vercel serverless rewrites match correctly
+const expenseRoutes = require('../routes/expenseRoutes');
+app.use('/api/expenses', expenseRoutes);
+app.use('/expenses', expenseRoutes);
+app.use('/backend/api/expenses', expenseRoutes);
+app.use('/backend/api', expenseRoutes);
 
 // Health check
 app.get('/api', (req, res) => {

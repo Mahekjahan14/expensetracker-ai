@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 const Expense = require('../models/Expense');
@@ -6,7 +5,6 @@ const multer = require('multer');
 const { GoogleGenAI } = require('@google/genai');
 
 const upload = multer({ storage: multer.memoryStorage() });
-const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
 
 // Create
 router.post('/', async (req, res) => {
@@ -24,6 +22,12 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ error: 'No image uploaded' });
     }
+
+    if (!process.env.GOOGLE_API_KEY) {
+      return res.status(500).json({ error: 'GOOGLE_API_KEY is not configured in Vercel Environment Variables' });
+    }
+
+    const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY });
 
     // Convert buffer to base64
     const base64Data = req.file.buffer.toString('base64');
@@ -46,12 +50,10 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     });
 
     const resultText = response.text;
-    // Gemini might wrap in markdown ```json ... ```, parse it
     let extractedData;
     try {
       extractedData = JSON.parse(resultText);
     } catch (e) {
-      // attempt to remove markdown if any
       const cleaned = resultText.replace(/```json/g, '').replace(/```/g, '').trim();
       extractedData = JSON.parse(cleaned);
     }
@@ -67,10 +69,9 @@ router.post('/upload', upload.single('image'), async (req, res) => {
     res.status(201).json(expense);
   } catch (err) {
     console.error('AI Error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message || 'AI processing failed' });
   }
 });
-
 
 // Read
 router.get('/', async (req, res) => {

@@ -102,7 +102,8 @@ function ExpensesPage() {
       fetchExpenses();
     } catch (err) {
       console.error('Error uploading file:', err);
-      alert('Error processing bill image. Please check backend logs and API Key.');
+      const serverError = err.response?.data?.error || err.message;
+      alert(`AI Bill Scan Failed: ${serverError}. (Please check Vercel logs and GOOGLE_API_KEY)`);
     } finally {
       setIsUploading(false);
     }

@@ -26,7 +26,7 @@ const uploadHandler = async (req, res) => {
     const base64Data = req.file.buffer.toString('base64');
     
     const response = await ai.models.generateContent({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       contents: [
         {
           role: 'user',

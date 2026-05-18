@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Camera, Plus, Trash2, Receipt, Edit2, Check, X } from 'lucide-react';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/expenses';
+const API_URL = '/_/backend/api/expenses';
 
 function ExpensesPage() {
   const [expenses, setExpenses] = useState([]);

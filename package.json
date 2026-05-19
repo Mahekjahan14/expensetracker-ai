@@ -4,10 +4,14 @@
   "private": true,
   "scripts": {
     "build": "cd frontend && npm install --legacy-peer-deps && npm run build && node -e \"const fs=require('fs'); fs.cpSync('build', '../build', {recursive:true});\"",
-    "vercel-build": "cd frontend && npm install --legacy-peer-deps && npm run build && node -e \"const fs=require('fs'); fs.cpSync('build', '../build', {recursive:true});\""
+    "vercel-build": "cd frontend && npm install --legacy-peer-deps && npm run build && node -e \"const fs=require('fs'); fs.cpSync('build', '../build', {recursive:true});\"",
+    "server": "node local-server.js",
+    "frontend": "npm start --prefix frontend",
+    "dev": "node dev.js"
   },
   "dependencies": {
     "@google/genai": "^1.52.0",
+    "busboy": "^1.6.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
